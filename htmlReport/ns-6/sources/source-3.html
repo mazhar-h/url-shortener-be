@@ -1,0 +1,80 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LinkService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.example.linkRedirector.service</a>
+</div>
+
+<h1>Coverage Summary for Class: LinkService (com.example.linkRedirector.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">LinkService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.example.linkRedirector.service;
+&nbsp;
+&nbsp;import com.example.linkRedirector.model.Url;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public interface LinkService {
+&nbsp;    ResponseEntity&lt;Url&gt; addUrl(String url);
+&nbsp;    String deleteUrl(String code);
+&nbsp;    Url getUrl(String code);
+&nbsp;    List&lt;Url&gt; getAllUrls();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-07-11 22:35</div>
+</div>
+</body>
+</html>

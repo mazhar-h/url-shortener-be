@@ -1,0 +1,212 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PollServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.example.linkRedirector.service</a>
+</div>
+
+<h1>Coverage Summary for Class: PollServiceImpl (com.example.linkRedirector.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PollServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    11.1%
+  </span>
+  <span class="absValue">
+    (1/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    4%
+  </span>
+  <span class="absValue">
+    (2/50)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.example.linkRedirector.service;
+&nbsp;
+&nbsp;import com.example.linkRedirector.exception.BadRequestException;
+&nbsp;import com.example.linkRedirector.exception.NotFoundException;
+&nbsp;import com.example.linkRedirector.exception.UnprocessableEntity;
+&nbsp;import com.example.linkRedirector.model.Choice;
+&nbsp;import com.example.linkRedirector.model.Poll;
+&nbsp;import com.example.linkRedirector.repository.PollRepository;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.Random;
+&nbsp;import java.util.concurrent.atomic.AtomicInteger;
+&nbsp;
+&nbsp;@Service
+&nbsp;public class PollServiceImpl implements PollService {
+&nbsp;
+&nbsp;    PollRepository pollRepository;
+&nbsp;
+<b class="fc">&nbsp;    public PollServiceImpl(PollRepository pollRepository) {</b>
+<b class="fc">&nbsp;        this.pollRepository = pollRepository;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Poll createPoll(Poll poll) {
+<b class="nc">&nbsp;        poll.setPollId(getCode(5));</b>
+<b class="nc">&nbsp;        Optional&lt;Poll&gt; dbPoll = pollRepository.findById(poll.getPollId());</b>
+<b class="nc">&nbsp;        int tries = 0;</b>
+<b class="nc">&nbsp;        while (dbPoll.isPresent() &amp;&amp; tries &lt; 3) {</b>
+<b class="nc">&nbsp;            poll.setPollId(getCode(5));</b>
+<b class="nc">&nbsp;            dbPoll = pollRepository.findById(poll.getPollId());</b>
+<b class="nc">&nbsp;            tries++;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return pollRepository.save(poll);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Poll getPoll(String id) {
+<b class="nc">&nbsp;        Optional&lt;Poll&gt; dbPoll = pollRepository.findById(id);</b>
+<b class="nc">&nbsp;        if (dbPoll.isEmpty())</b>
+<b class="nc">&nbsp;            throw new NotFoundException();</b>
+<b class="nc">&nbsp;        return dbPoll.get();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Poll&gt; getAllPolls() {
+<b class="nc">&nbsp;        return pollRepository.findAll();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String updatePoll(String id, Poll poll) {
+<b class="nc">&nbsp;        Optional&lt;Poll&gt; dbPoll = pollRepository.findById(id);</b>
+<b class="nc">&nbsp;        if (dbPoll.isEmpty())</b>
+<b class="nc">&nbsp;            throw new NotFoundException();</b>
+&nbsp;
+<b class="nc">&nbsp;        DateTimeFormatter dtf = DateTimeFormatter.ofPattern( &quot;yyyy-MM-dd HH:mm&quot; );</b>
+<b class="nc">&nbsp;        LocalDateTime now = LocalDateTime.now();</b>
+<b class="nc">&nbsp;        String currentDateTime = dtf.format(now);</b>
+&nbsp;
+<b class="nc">&nbsp;        LocalDateTime cdt = LocalDateTime.parse( currentDateTime, dtf ) ;</b>
+<b class="nc">&nbsp;        LocalDateTime pdt = LocalDateTime.parse( dbPoll.get().getEndDateTime() , dtf ) ;</b>
+&nbsp;
+<b class="nc">&nbsp;        if (cdt.isAfter(pdt))</b>
+<b class="nc">&nbsp;            throw new UnprocessableEntity();</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;Choice&gt; dbChoices = dbPoll.get().getChoices();</b>
+<b class="nc">&nbsp;        AtomicInteger numberOfVotesUpdated = new AtomicInteger();</b>
+&nbsp;
+<b class="nc">&nbsp;        poll.getChoices().stream().forEach(choice -&gt; {</b>
+<b class="nc">&nbsp;            dbChoices.stream().forEach(dbChoice -&gt; {</b>
+<b class="nc">&nbsp;                if (dbChoice.getChoiceId() == choice.getChoiceId()) {</b>
+<b class="nc">&nbsp;                    dbChoice.setVotes(choice.getVotes());</b>
+<b class="nc">&nbsp;                    numberOfVotesUpdated.addAndGet(1);</b>
+&nbsp;                }
+&nbsp;            });
+&nbsp;        });
+&nbsp;
+<b class="nc">&nbsp;        if (numberOfVotesUpdated.get() == 0 &amp;&amp; poll.getChoices().size() &gt; 0)</b>
+<b class="nc">&nbsp;            throw new BadRequestException();</b>
+&nbsp;
+<b class="nc">&nbsp;        dbPoll.get().setChoices(dbChoices);</b>
+<b class="nc">&nbsp;        pollRepository.save(dbPoll.get());</b>
+<b class="nc">&nbsp;        return &quot;Updated&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String deletePoll(String id) {
+<b class="nc">&nbsp;        Optional&lt;Poll&gt; dbPoll = pollRepository.findById(id);</b>
+<b class="nc">&nbsp;        if (dbPoll.isEmpty())</b>
+<b class="nc">&nbsp;            throw new NotFoundException();</b>
+<b class="nc">&nbsp;        pollRepository.deleteById(id);</b>
+<b class="nc">&nbsp;        return &quot;Deleted&quot;;</b>
+&nbsp;    }
+&nbsp;    public String getCode(int length) {
+<b class="nc">&nbsp;        Random rand = new Random(System.currentTimeMillis());</b>
+<b class="nc">&nbsp;        StringBuilder code = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="nc">&nbsp;            switch (rand.nextInt(3)) {</b>
+<b class="nc">&nbsp;                case 0 -&gt; code.append((char) (rand.nextInt(26) + &#39;a&#39;));</b>
+<b class="nc">&nbsp;                case 1 -&gt; code.append((char) (rand.nextInt(26) + &#39;A&#39;));</b>
+<b class="nc">&nbsp;                case 2 -&gt; code.append(rand.nextInt(10));</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return code.toString();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-07-11 22:35</div>
+</div>
+</body>
+</html>
